@@ -38,13 +38,26 @@ Abra http://localhost:5173 no navegador.
 
 ## Status do projeto
 
-- [x] **Fase 0** — Fundação (Vite + Three.js + cubo girando — smoke test)
-- [ ] **Fase 1** — Core 3D (cena, câmera isométrica, personagem)
-- [ ] **Fase 2** — Controles e física AABB
-- [ ] **Fase 3** — Nozes, pontuação, áudio, partículas
-- [ ] **Fase 4** — Obstáculos, fases, progressão
-- [ ] **Fase 5** — UI, som e acessibilidade final
-- [ ] **Fase 6** — Deploy e teste final em campo
+- [x] **Fase 0** — Fundação (Vite + Three.js + ESLint + smoke test)
+- [x] **Fase 1** — Jogabilidade mínima (esquilo, tronco, física AABB, input teclado/toque, câmera com lerp)
+- [ ] **Fase 2** — Coleta de nozes, pontuação, partículas
+- [ ] **Fase 3** — 2 fases, vidas, tela de fim, replay
+- [ ] **Fase 4** — UI completa (menu, pausa) + acessibilidade formal (axe-core)
+- [ ] **Fase 5** — Áudio (música + efeitos) + mute
+- [ ] **Fase 6** — Testes E2E (Playwright) + usabilidade com crianças
+- [ ] **Fase 7** — Deploy (VPS + GitHub Pages) + CI/CD
+
+## Controles (Fase 1)
+
+| Ação | Teclado | Toque |
+|---|---|---|
+| Mover esquerda | ← / A | Swipe esquerda |
+| Mover direita | → / D | Swipe direita |
+| Pular | ↑ / W / Espaço | Swipe cima |
+
+## Documentação
+
+- [Fase 1 — Especificação técnica](./docs/fase-1.md)
 
 ## Licença
 

@@ -6,3 +6,5 @@ dist/
 Thumbs.db
 coverage/
 .vite/
+playwright-report/
+test-results/

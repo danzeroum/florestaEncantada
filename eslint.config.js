@@ -3,6 +3,9 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default [
+  {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'playwright-report/**', 'test-results/**'],
+  },
   js.configs.recommended,
   {
     files: ['**/*.js'],

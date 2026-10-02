@@ -1,73 +1,60 @@
 import * as THREE from 'three';
+import { createSquirrel } from './Squirrel.js';
+import { createLogObstacle } from './Obstacle.js';
 
 /**
- * Cria a cena base com cubo girando (smoke test da Fase 0).
- * Retorna todos os objetos para o loop animar.
+ * Monta a cena da Fase 1: chão, céu, luzes, esquilo e tronco.
+ * Retorna tudo que o loop precisa para animar.
  */
 export function createScene() {
   // ── Cena ──
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#8bc34a');
-  scene.fog = new THREE.Fog('#8bc34a', 40, 80);
+  scene.background = new THREE.Color(0xb3e5fc);
 
-  // ── Câmera isométrica (~45°) ──
+  // ── Céu (esfera vista de dentro) ──
+  const skyGeo = new THREE.SphereGeometry(100, 32, 16);
+  const skyMat = new THREE.MeshBasicMaterial({ color: 0xb3e5fc, side: THREE.BackSide });
+  const sky = new THREE.Mesh(skyGeo, skyMat);
+  sky.name = 'sky';
+  scene.add(sky);
+
+  // ── Câmera isométrica ──
   const camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
-  camera.position.set(10, 12, 20);
-  camera.lookAt(0, 0, 0);
+  camera.position.set(0, 14, 22);
+  camera.lookAt(0, 1, 0);
 
-  // ── Luz ambiente suave ──
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // ── Luzes ──
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
   scene.add(ambientLight);
 
-  // ── Luz direcional (sol) ──
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  dirLight.position.set(20, 40, 30);
-  dirLight.castShadow = false;
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  dirLight.position.set(15, 35, 25);
   scene.add(dirLight);
 
   // ── Chão (grama) ──
-  const groundGeometry = new THREE.PlaneGeometry(40, 40);
-  const groundMaterial = new THREE.MeshStandardMaterial({
-    color: 0x4caf50,
-    roughness: 0.9,
-    metalness: 0.1,
-  });
-  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-  ground.position.set(0, 0, 0);
+  const groundGeo = new THREE.PlaneGeometry(40, 40);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.9 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.name = 'ground';
   scene.add(ground);
 
-  // ── Cubo girando (placeholder do esquilo) ──
-  const geometry = new THREE.BoxGeometry(2, 2, 2);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffb300,
-    roughness: 0.3,
-    metalness: 0.2,
-  });
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(0, 1, 0);
-  cube.castShadow = false;
-  cube.name = 'player-placeholder';
-  scene.add(cube);
+  // ── Player (esquilo geométrico) ──
+  const player = createSquirrel(scene);
+
+  // ── Obstáculos ──
+  const obstacles = [createLogObstacle(scene, 5, 0), createLogObstacle(scene, 9, -3)];
 
   // ── Renderer ──
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true,
-  });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
 
-  // ── Label DOM (texto sobre o cubo) ──
-  const label = document.createElement('div');
-  label.textContent = '🌱 Floresta Encantada — smoke test';
-
-  return { scene, camera, renderer, cube, label };
+  return { scene, camera, renderer, player, obstacles };
 }

@@ -1,5 +1,6 @@
 import './styles.css';
 import { createScene } from './core/scene.js';
+import { setupInput } from './core/input.js';
 import { startLoop } from './core/loop.js';
 
 // ── Monta a cena no #root ──
@@ -8,15 +9,14 @@ if (!root) {
   throw new Error('#root não encontrado no index.html');
 }
 
-const { scene, camera, renderer, cube, label } = createScene();
+const { scene, camera, renderer, player, obstacles } = createScene();
 root.appendChild(renderer.domElement);
 
-// ── Label visual (smoke test) ──
-label.id = 'cube-label';
-root.appendChild(label);
+// ── Setup de input ──
+setupInput();
 
-// ── Inicia o loop de animação ──
-startLoop(scene, camera, renderer, cube);
+// ── Inicia o loop ──
+startLoop({ scene, camera, renderer, player, obstacles });
 
 // ── Resize responsivo ──
 function onResize() {
