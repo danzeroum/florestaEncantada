@@ -12,6 +12,7 @@ export default {
     ambient: 0.45,       // menos luz ambiente
   },
   layout: {
+    speed: 1.05,
     obstacles: [
       { type: 'log', x: 4, z: 0 },
       { type: 'moleHole', x: 9, z: 0 },

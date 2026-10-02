@@ -7,6 +7,7 @@ export default {
   name: 'ceu',
   theme: { sky: 0x81d4fa, ground: 0x90caf9, ambient: 0.85 },
   layout: {
+    speed: 1.3,
     obstacles: [
       { type: 'mushroom', x: 4, z: 0 },
       { type: 'log', x: 7.5, z: 0 },

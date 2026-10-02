@@ -21,14 +21,14 @@ import {
  * @param {number} x
  * @param {number} z
  */
-export function createObstacle(type, scene, x, z) {
+export function createObstacle(type, scene, x, z, options = {}) {
   switch (type) {
     case 'log':
       return createLogObstacle(scene, x, z);
     case 'moleHole':
-      return createMoleHoleObstacle(scene, x, z);
+      return createMoleHoleObstacle(scene, x, z, { speed: options.speed });
     case 'mushroom':
-      return createMushroomObstacle(scene, x, z);
+      return createMushroomObstacle(scene, x, z, { speed: options.speed });
     default:
       throw new Error(`Tipo de obstáculo desconhecido: ${type}`);
   }
@@ -75,6 +75,7 @@ export function resetPlayer(player) {
  */
 export function rebuildWorld(refs, layout) {
   const { scene, obstacles, nuts } = refs;
+  const speed = layout.speed ?? 1;
 
   for (const nut of nuts) disposeMesh(nut.mesh);
   nuts.length = 0;
@@ -85,6 +86,6 @@ export function rebuildWorld(refs, layout) {
   for (const obstacle of obstacles) disposeMesh(obstacle.mesh);
   obstacles.length = 0;
   for (const item of layout.obstacles) {
-    obstacles.push(createObstacle(item.type, scene, item.x, item.z));
+    obstacles.push(createObstacle(item.type, scene, item.x, item.z, { speed }));
   }
 }

@@ -63,7 +63,14 @@ export function createLogObstacle(scene, x, z) {
  * @param {number} x
  * @param {number} z
  */
-export function createMoleHoleObstacle(scene, x, z) {
+/**
+ * @param {THREE.Scene} scene
+ * @param {number} x
+ * @param {number} z
+ * @param {{ speed?:number }} [options] speed=1 é o default; >1 acelera o ciclo
+ */
+export function createMoleHoleObstacle(scene, x, z, options = {}) {
+  const speed = options.speed ?? 1;
   const group = new THREE.Group();
   group.name = 'moleHole';
 
@@ -98,18 +105,18 @@ export function createMoleHoleObstacle(scene, x, z) {
   let visible = true;
 
   function update(delta) {
-    elapsed += delta;
+    elapsed += delta * speed;
     const cycle = MOLE_CYCLE_ON + MOLE_CYCLE_OFF;
     const phase = elapsed % cycle;
     visible = phase < MOLE_CYCLE_ON;
 
     // Anima a subida/descida do corpo + olhos
     const targetY = visible ? GROUND_Y + MOLE_HEIGHT * 0.5 : GROUND_Y - MOLE_HEIGHT;
-    const speed = 6;
-    body.position.y += (targetY - body.position.y) * Math.min(1, speed * delta);
+    const lerpSpeed = 6;
+    body.position.y += (targetY - body.position.y) * Math.min(1, lerpSpeed * delta);
     const eyeTargetY = visible ? GROUND_Y + MOLE_HEIGHT * 0.65 : GROUND_Y - MOLE_HEIGHT;
-    eyeL.position.y += (eyeTargetY - eyeL.position.y) * Math.min(1, speed * delta);
-    eyeR.position.y += (eyeTargetY - eyeR.position.y) * Math.min(1, speed * delta);
+    eyeL.position.y += (eyeTargetY - eyeL.position.y) * Math.min(1, lerpSpeed * delta);
+    eyeR.position.y += (eyeTargetY - eyeR.position.y) * Math.min(1, lerpSpeed * delta);
   }
 
   function isActive() {
@@ -134,7 +141,14 @@ export function createMoleHoleObstacle(scene, x, z) {
  * @param {number} x
  * @param {number} z
  */
-export function createMushroomObstacle(scene, x, z) {
+/**
+ * @param {THREE.Scene} scene
+ * @param {number} x
+ * @param {number} z
+ * @param {{ speed?:number }} [options] speed=1 é o default; >1 acelera o salto
+ */
+export function createMushroomObstacle(scene, x, z, options = {}) {
+  const speed = options.speed ?? 1;
   const group = new THREE.Group();
   group.name = 'mushroom';
 
@@ -174,7 +188,7 @@ export function createMushroomObstacle(scene, x, z) {
   const SPOT_BASE_OFFSETS = [0.15, 0.1, 0.13];
 
   function update(delta) {
-    elapsed += delta;
+    elapsed += delta * speed;
     const t = (elapsed / MUSHROOM_PERIOD) * Math.PI * 2;
     const baseOffset = (Math.sin(t) * 0.5 + 0.5) * MUSHROOM_MAX_Y;
 

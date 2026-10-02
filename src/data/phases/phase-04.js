@@ -7,6 +7,7 @@ export default {
   name: 'outono',
   theme: { sky: 0xffcc80, ground: 0xbf6b1f, ambient: 0.65 },
   layout: {
+    speed: 1.05,
     obstacles: [
       { type: 'log', x: 4, z: 0 },
       { type: 'log', x: 7.5, z: 0 },

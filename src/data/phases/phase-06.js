@@ -7,6 +7,7 @@ export default {
   name: 'rio',
   theme: { sky: 0x4fc3f7, ground: 0x26a69a, ambient: 0.75 },
   layout: {
+    speed: 1.1,
     obstacles: [
       { type: 'log', x: 5, z: 0 },
       { type: 'mushroom', x: 11, z: 0 },

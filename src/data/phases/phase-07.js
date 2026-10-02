@@ -7,6 +7,7 @@ export default {
   name: 'nevoeiro',
   theme: { sky: 0xb0bec5, ground: 0x78909c, ambient: 0.6 },
   layout: {
+    speed: 1.15,
     obstacles: [
       { type: 'log', x: 3.5, z: 0 },
       { type: 'moleHole', x: 7, z: 0 },

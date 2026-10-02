@@ -7,6 +7,7 @@ export default {
   name: 'caverna',
   theme: { sky: 0x37474f, ground: 0x546e7a, ambient: 0.5 },
   layout: {
+    speed: 1.1,
     obstacles: [
       { type: 'moleHole', x: 4, z: 0 },
       { type: 'mushroom', x: 8, z: 0 },

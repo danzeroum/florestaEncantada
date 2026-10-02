@@ -7,6 +7,7 @@ export default {
   name: 'inverno',
   theme: { sky: 0xb3e5fc, ground: 0xcfd8dc, ambient: 0.85 },
   layout: {
+    speed: 1.25,
     obstacles: [
       { type: 'log', x: 4, z: 0 },
       { type: 'mushroom', x: 8, z: 0 },

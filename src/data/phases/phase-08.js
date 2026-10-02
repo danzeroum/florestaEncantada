@@ -7,6 +7,7 @@ export default {
   name: 'tempestade',
   theme: { sky: 0x37474f, ground: 0x455a64, ambient: 0.45 },
   layout: {
+    speed: 1.2,
     obstacles: [
       { type: 'moleHole', x: 4, z: 0 },
       { type: 'mushroom', x: 7.5, z: 0 },
