@@ -208,6 +208,7 @@ export function startLoop(sceneData) {
         if (collectPowerUp(scene, pu)) {
           if (effects) effects.activate(pu.type);
           if (hud && hud.showBuff) hud.showBuff(pu.type);
+          if (audio) audio.play(SFX.POWERUP);
           particles.explode(
             pu.position.x,
             pu.position.y + 0.8,

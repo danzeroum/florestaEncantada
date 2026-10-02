@@ -86,6 +86,31 @@ body {
   align-items: center;
 }
 
+.hud__buffs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hud__buff {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--hud-bg);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: buff-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes buff-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+  50% { transform: scale(1.12); box-shadow: 0 4px 20px rgba(255, 235, 59, 0.6); }
+}
+
 .hud__heart--lost {
   animation: heart-lost 0.4s ease-out;
 }

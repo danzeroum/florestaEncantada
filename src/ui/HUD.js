@@ -80,8 +80,14 @@ export function createHUD(root, options = {}) {
   livesGroup.setAttribute('role', 'status');
   livesGroup.setAttribute('aria-label', 'Vidas restantes');
 
+  const buffsGroup = document.createElement('div');
+  buffsGroup.className = 'hud__buffs';
+  buffsGroup.setAttribute('role', 'status');
+  buffsGroup.setAttribute('aria-label', 'Efeitos ativos');
+
   container.appendChild(nutsGroup);
   container.appendChild(livesGroup);
+  container.appendChild(buffsGroup);
 
   // ── Overlay de vitória ──
   const victory = document.createElement('div');
@@ -194,11 +200,36 @@ export function createHUD(root, options = {}) {
     gameOver.hidden = true;
   }
 
+  const BUFF_ICONS = {
+    magnet: `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M5 4v8a7 7 0 0 0 14 0V4h-3v8a4 4 0 0 1-8 0V4H5z" fill="#e91e63" /></svg>`,
+    shield: `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#03a9f4" /></svg>`,
+    slowMo: `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 4l5 8-5 8-5-8 5-8z" fill="#9c27b0" /></svg>`,
+    double: `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="#ffc107" /><rect x="11" y="11" width="9" height="9" rx="1.5" fill="#ffb300" /></svg>`,
+  };
+
+  function showBuff(type) {
+    if (!BUFF_ICONS[type]) return;
+    // Remove duplicata (reativação)
+    const existing = buffsGroup.querySelector(`[data-buff="${type}"]`);
+    if (existing) existing.remove();
+
+    const el = document.createElement('span');
+    el.className = 'hud__buff';
+    el.dataset.buff = type;
+    el.innerHTML = BUFF_ICONS[type];
+    buffsGroup.appendChild(el);
+  }
+
+  function clearBuffs() {
+    buffsGroup.innerHTML = '';
+  }
+
   function reset() {
     hideVictory();
     hideGameOver();
     counter.textContent = '0 / 0';
     livesGroup.innerHTML = '';
+    buffsGroup.innerHTML = '';
   }
 
   function dispose() {
@@ -214,6 +245,8 @@ export function createHUD(root, options = {}) {
     hideVictory,
     showGameOver,
     hideGameOver,
+    showBuff,
+    clearBuffs,
     reset,
     dispose,
   };

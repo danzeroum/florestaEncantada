@@ -12,6 +12,7 @@ export const SFX = {
   LOSE_LIFE: 'loseLife',
   VICTORY: 'victory',
   GAME_OVER: 'gameOver',
+  POWERUP: 'powerUp',
 };
 
 // Definições dos sons — cada um é uma pequena receita de osciladores.
@@ -51,6 +52,12 @@ const SFX_RECIPES = {
     endFreq: 80,
     duration: 0.7,
     type: 'sawtooth',
+    volume: 0.22,
+  },
+  [SFX.POWERUP]: {
+    arpeggio: [523, 659, 784, 1047],
+    noteDuration: 0.09,
+    type: 'triangle',
     volume: 0.22,
   },
 };
