@@ -23,6 +23,16 @@ const NEXT_ICON_SVG = `
   </svg>
 `;
 
+const TROPHY_ICON_SVG = `
+  <svg viewBox="0 0 24 24" width="120" height="120" aria-hidden="true" focusable="false">
+    <path d="M7 4h10v5a5 5 0 0 1-10 0V4z" fill="#FFC107" stroke="#F57F17" stroke-width="1.5" />
+    <path d="M7 5H4v2a3 3 0 0 0 3 3" fill="none" stroke="#F57F17" stroke-width="1.5" />
+    <path d="M17 5h3v2a3 3 0 0 1-3 3" fill="none" stroke="#F57F17" stroke-width="1.5" />
+    <rect x="10" y="12" width="4" height="5" fill="#FFC107" stroke="#F57F17" stroke-width="1.5" />
+    <rect x="6" y="17" width="12" height="3" rx="1" fill="#FFC107" stroke="#F57F17" stroke-width="1.5" />
+  </svg>
+`;
+
 const HEART_FULL_SVG = `
   <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
     <path d="M12 21s-7-4.5-9.5-9C.8 9 2.4 5.5 5.8 5.5c2 0 3.3 1.1 4.2 2.2C10.9 6.6 12.2 5.5 14.2 5.5c3.4 0 5 3.5 3.3 6.5C19 16.5 12 21 12 21z" fill="#FF5252" stroke="#fff" stroke-width="1.2" />
@@ -146,12 +156,23 @@ export function createHUD(root, options = {}) {
 
   function showVictory(options = {}) {
     const isLast = options.isLast === true;
+    const isFinal = options.isFinalVictory === true;
     const onNext = options.onNext;
-    if (isLast || typeof onNext !== 'function') {
+
+    victory.classList.toggle('victory--final', isFinal);
+
+    if (isFinal) {
+      victoryIcon.innerHTML = TROPHY_ICON_SVG;
+      replayBtn.innerHTML = REPLAY_ICON_SVG;
+      replayBtn.setAttribute('aria-label', 'Jogar de novo');
+      onVictoryButton = onReplay;
+    } else if (isLast || typeof onNext !== 'function') {
+      victoryIcon.innerHTML = NUT_ICON_SVG;
       replayBtn.innerHTML = REPLAY_ICON_SVG;
       replayBtn.setAttribute('aria-label', 'Jogar de novo');
       onVictoryButton = onReplay;
     } else {
+      victoryIcon.innerHTML = NUT_ICON_SVG;
       replayBtn.innerHTML = NEXT_ICON_SVG;
       replayBtn.setAttribute('aria-label', 'Próxima fase');
       onVictoryButton = onNext;
