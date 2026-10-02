@@ -47,4 +47,9 @@ describe('createLogObstacle', () => {
     expect(obstacle.collider.height).toBe(1.0);
     expect(obstacle.collider.depth).toBe(2.2);
   });
+
+  it('is not hostile (log is a platform obstacle, not an enemy)', () => {
+    const obstacle = createLogObstacle(fakeScene(), 0, 0);
+    expect(obstacle.hostile).toBe(false);
+  });
 });

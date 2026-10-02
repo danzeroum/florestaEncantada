@@ -116,9 +116,11 @@ export function startLoop(sceneData) {
         player.position.x += push.x;
         player.position.z += push.z;
 
-        // Só tira vida se o obstáculo está ativo (moleHole pode estar oculto)
+        // Só tira vida se o obstáculo for hostil E estiver ativo.
+        // Troncos são "hostile: false" (obstáculo de plataforma, sem dano).
         const active = typeof obstacle.isActive === 'function' ? obstacle.isActive() : true;
-        if (active) onObstacleHit();
+        const hostile = obstacle.hostile === true;
+        if (active && hostile) onObstacleHit();
       }
     }
 

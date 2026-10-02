@@ -32,5 +32,6 @@ export function createLogObstacle(scene, x, z) {
     mesh,
     position: { x, y: GROUND_Y, z },
     collider: { width: LOG_WIDTH, height: LOG_HEIGHT, depth: LOG_DEPTH },
+    hostile: false, // tronco é obstáculo de plataforma, não inimigo
   };
 }
