@@ -17,7 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "a11y": "node scripts/a11y-check.mjs"
   },
   "dependencies": {
     "three": "^0.170.0"
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@vitest/coverage-v8": "^5.0.3",
+    "axe-core": "^4.13.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.0.0",
     "globals": "^15.0.0",
