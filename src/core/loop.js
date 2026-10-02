@@ -9,13 +9,18 @@ import {
   GROUND_Y,
 } from './physics.js';
 import { collectNut } from './Nut.js';
+import { collectPowerUp } from './PowerUp.js';
 import { createScoreManager } from './ScoreManager.js';
 import { SFX } from './AudioManager.js';
+import { POWERUP_TYPES } from './PowerUp.js';
 
 const MOVE_SPEED = 5;
 const CAMERA_LERP = 0.08;
 const INVULNERABILITY_TIME = 1.0; // segundos de invulnerabilidade após perder vida
 const TRIP_DURATION = 0.4;
+const MAGNET_RADIUS = 4;
+const MAGNET_ATTRACT_SPEED = 8;
+const SLOW_MO_FACTOR = 0.5;
 
 const NUT_COLORS = {
   sphere: 0xff5252,
@@ -38,11 +43,13 @@ export function startLoop(sceneData) {
     player,
     obstacles,
     nuts,
+    powerUps = [],
     particles,
     hud,
     lifeManager,
     onPhaseComplete,
     audio,
+    effects,
   } = sceneData;
   const cameraOffset = new THREE.Vector3(0, 14, 22);
   const cameraTarget = new THREE.Vector3();
@@ -80,6 +87,12 @@ export function startLoop(sceneData) {
 
   function onObstacleHit() {
     if (invulnerability > 0) return;
+
+    // Escudo absorve o hit sem custo de vida
+    if (effects && effects.consumeShield()) {
+      invulnerability = INVULNERABILITY_TIME;
+      return;
+    }
 
     if (audio) audio.play(SFX.LOSE_LIFE);
     lifeManager.loseLife();
@@ -120,6 +133,13 @@ export function startLoop(sceneData) {
       if (audio) audio.play(SFX.JUMP);
     }
 
+    // ── 2.5. Efeitos (power-ups) ──
+    if (effects) effects.update(delta);
+    const isDouble = effects?.isActive(POWERUP_TYPES.DOUBLE) === true;
+    const isMagnet = effects?.isActive(POWERUP_TYPES.MAGNET) === true;
+    const isSlowMo = effects?.isActive(POWERUP_TYPES.SLOW_MO) === true;
+    const worldDelta = isSlowMo ? delta * SLOW_MO_FACTOR : delta;
+
     // ── 3. Gravidade ──
     applyGravity(player, delta);
 
@@ -139,12 +159,36 @@ export function startLoop(sceneData) {
       }
     }
 
-    // ── 5. Coleta de nozes ──
+    // ── 5a. Ímã atrai nozes próximas ──
+    if (isMagnet) {
+      for (const nut of nuts) {
+        if (nut.collected) continue;
+        const dx = player.position.x - nut.position.x;
+        const dz = player.position.z - nut.position.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 0 && dist < MAGNET_RADIUS) {
+          const moveAmount = Math.min(dist, MAGNET_ATTRACT_SPEED * delta);
+          const nx = dx / dist;
+          const nz = dz / dist;
+          const newX = nut.position.x + nx * moveAmount;
+          const newZ = nut.position.z + nz * moveAmount;
+          nut.position.x = newX;
+          nut.position.z = newZ;
+          // Atualiza mesh visualmente (mantém yOffset)
+          nut.mesh.position.x = newX;
+          nut.mesh.position.z = newZ;
+        }
+      }
+    }
+
+    // ── 5b. Coleta de nozes ──
     for (const nut of nuts) {
       if (nut.collected) continue;
       if (checkCollision(player, nut)) {
         if (collectNut(scene, nut)) {
-          const score = scoreManager.increment();
+          // Duplicador: incrementa 2× se ativo
+          let score = scoreManager.increment();
+          if (isDouble) score = scoreManager.increment();
           if (audio) audio.play(SFX.COLLECT);
           if (hud) hud.setScore(score, scoreManager.getTotal());
           particles.explode(
@@ -157,12 +201,29 @@ export function startLoop(sceneData) {
       }
     }
 
+    // ── 5c. Coleta de power-ups ──
+    for (const pu of powerUps) {
+      if (pu.collected) continue;
+      if (checkCollision(player, pu)) {
+        if (collectPowerUp(scene, pu)) {
+          if (effects) effects.activate(pu.type);
+          if (hud && hud.showBuff) hud.showBuff(pu.type);
+          particles.explode(
+            pu.position.x,
+            pu.position.y + 0.8,
+            pu.position.z,
+            0xffffff
+          );
+        }
+      }
+    }
+
     // ── 6. Partículas ──
     particles.update(delta);
 
-    // ── 7. Obstáculos animados ──
+    // ── 7. Obstáculos animados (slow-mo afeta SÓ eles, não o player) ──
     for (const obstacle of obstacles) {
-      if (typeof obstacle.update === 'function') obstacle.update(delta);
+      if (typeof obstacle.update === 'function') obstacle.update(worldDelta);
     }
 
     // ── 8. Mesh do player ──
