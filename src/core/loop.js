@@ -30,7 +30,18 @@ const NUT_COLORS = {
  * @returns {{ stop:()=>void, scoreManager:any }}
  */
 export function startLoop(sceneData) {
-  const { scene, camera, renderer, player, obstacles, nuts, particles, hud, lifeManager } = sceneData;
+  const {
+    scene,
+    camera,
+    renderer,
+    player,
+    obstacles,
+    nuts,
+    particles,
+    hud,
+    lifeManager,
+    onPhaseComplete,
+  } = sceneData;
   const cameraOffset = new THREE.Vector3(0, 14, 22);
   const cameraTarget = new THREE.Vector3();
   const lerpTarget = new THREE.Vector3();
@@ -161,8 +172,8 @@ export function startLoop(sceneData) {
     // ── 10. Vitória ──
     if (!victoryShown && scoreManager.isVictory()) {
       victoryShown = true;
-      if (hud) hud.showVictory();
       running = false;
+      if (typeof onPhaseComplete === 'function') onPhaseComplete();
     }
 
     renderer.render(scene, camera);

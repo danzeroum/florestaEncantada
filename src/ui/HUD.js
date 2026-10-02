@@ -16,6 +16,13 @@ const REPLAY_ICON_SVG = `
   </svg>
 `;
 
+const NEXT_ICON_SVG = `
+  <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true" focusable="false">
+    <path d="M8 5l8 7-8 7V5z" fill="currentColor" />
+    <rect x="16" y="5" width="3" height="14" fill="currentColor" />
+  </svg>
+`;
+
 const HEART_FULL_SVG = `
   <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
     <path d="M12 21s-7-4.5-9.5-9C.8 9 2.4 5.5 5.8 5.5c2 0 3.3 1.1 4.2 2.2C10.9 6.6 12.2 5.5 14.2 5.5c3.4 0 5 3.5 3.3 6.5C19 16.5 12 21 12 21z" fill="#FF5252" stroke="#fff" stroke-width="1.2" />
@@ -82,9 +89,11 @@ export function createHUD(root, options = {}) {
   replayBtn.className = 'victory__replay';
   replayBtn.setAttribute('aria-label', 'Jogar de novo');
   replayBtn.innerHTML = REPLAY_ICON_SVG;
+
+  let onVictoryButton = onReplay;
   replayBtn.addEventListener('click', () => {
     hideVictory();
-    onReplay();
+    onVictoryButton();
   });
 
   victory.appendChild(victoryIcon);
@@ -135,7 +144,18 @@ export function createHUD(root, options = {}) {
     }
   }
 
-  function showVictory() {
+  function showVictory(options = {}) {
+    const isLast = options.isLast === true;
+    const onNext = options.onNext;
+    if (isLast || typeof onNext !== 'function') {
+      replayBtn.innerHTML = REPLAY_ICON_SVG;
+      replayBtn.setAttribute('aria-label', 'Jogar de novo');
+      onVictoryButton = onReplay;
+    } else {
+      replayBtn.innerHTML = NEXT_ICON_SVG;
+      replayBtn.setAttribute('aria-label', 'Próxima fase');
+      onVictoryButton = onNext;
+    }
     victory.hidden = false;
     replayBtn.focus();
   }

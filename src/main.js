@@ -9,7 +9,8 @@ import {
   createMoleHoleObstacle,
   createMushroomObstacle,
 } from './core/Obstacle.js';
-import { createLevel, OBSTACLE_TYPES } from './core/Level.js';
+import { OBSTACLE_TYPES } from './core/Level.js';
+import { createLevelManager } from './core/LevelManager.js';
 import { createLifeManager } from './core/LifeManager.js';
 
 const root = document.getElementById('root');
@@ -27,7 +28,7 @@ let currentLoop = null;
 let hud = null;
 let lifeManager = null;
 
-const LEVEL = createLevel();
+const levelManager = createLevelManager();
 
 function createObstacle(type, x, z) {
   switch (type) {
@@ -66,15 +67,17 @@ function resetPlayer() {
 }
 
 function rebuildWorld() {
+  const { layout } = levelManager.getCurrent();
+
   for (const nut of nuts) disposeMesh(nut.mesh);
   nuts.length = 0;
-  for (const item of LEVEL.nuts) {
+  for (const item of layout.nuts) {
     nuts.push(createNut(scene, item.type, item.x, item.z));
   }
 
   for (const obstacle of obstacles) disposeMesh(obstacle.mesh);
   obstacles.length = 0;
-  for (const item of LEVEL.obstacles) {
+  for (const item of layout.obstacles) {
     obstacles.push(createObstacle(item.type, item.x, item.z));
   }
 }
@@ -87,7 +90,7 @@ function onGameOver() {
   if (hud) hud.showGameOver();
 }
 
-function startGame() {
+function loadPhase() {
   if (currentLoop) {
     currentLoop.stop();
     currentLoop = null;
@@ -96,17 +99,9 @@ function startGame() {
   resetPlayer();
   rebuildWorld();
 
-  if (hud) hud.dispose();
-  hud = createHUD(root, { onReplay: startGame });
-
-  if (!lifeManager) {
-    lifeManager = createLifeManager(INITIAL_LIVES, undefined, onGameOver);
-  } else {
-    lifeManager.reset();
-  }
-
-  hud.setScore(0, nuts.length);
-  hud.setLives(lifeManager.getLives(), INITIAL_LIVES);
+  if (lifeManager) lifeManager.reset();
+  if (hud) hud.setLives(lifeManager.getLives(), INITIAL_LIVES);
+  if (hud) hud.setScore(0, nuts.length);
 
   currentLoop = startLoop({
     scene,
@@ -118,7 +113,41 @@ function startGame() {
     particles,
     hud,
     lifeManager,
+    onPhaseComplete,
   });
+}
+
+function onPhaseComplete() {
+  if (currentLoop) {
+    currentLoop.stop();
+    currentLoop = null;
+  }
+  const info = levelManager.getCurrent();
+  if (hud) {
+    hud.showVictory({
+      isLast: info.isLast,
+      onNext: info.isLast ? undefined : goToNextPhase,
+    });
+  }
+}
+
+function goToNextPhase() {
+  if (levelManager.next()) {
+    loadPhase();
+  } else {
+    startGame(); // fallback: reinicia tudo se não houver próxima fase
+  }
+}
+
+function startGame() {
+  levelManager.reset();
+  lifeManager = lifeManager ?? createLifeManager(INITIAL_LIVES, undefined, onGameOver);
+  lifeManager.reset();
+
+  if (hud) hud.dispose();
+  hud = createHUD(root, { onReplay: startGame });
+
+  loadPhase();
 }
 
 startGame();
