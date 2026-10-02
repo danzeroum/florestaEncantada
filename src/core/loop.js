@@ -223,8 +223,9 @@ export function startLoop(sceneData) {
     particles.update(delta);
 
     // ── 7. Obstáculos animados (slow-mo afeta SÓ eles, não o player) ──
+    const enemyContext = { playerX: player.position.x };
     for (const obstacle of obstacles) {
-      if (typeof obstacle.update === 'function') obstacle.update(worldDelta);
+      if (typeof obstacle.update === 'function') obstacle.update(worldDelta, enemyContext);
     }
 
     // ── 8. Mesh do player ──

@@ -18,7 +18,8 @@ export default {
       { type: 'log', x: 26.5, z: 0 },
       { type: 'mushroom', x: 30, z: 0 },
       { type: 'moleHole', x: 33.5, z: 0 },
-      { type: 'log', x: 37, z: 0 },
+      { type: 'bird', x: 37, z: 0 },
+      { type: 'snake', x: 40, z: 0 },
     ],
     nuts: [
       { type: 'cube', x: 2, z: 0 },

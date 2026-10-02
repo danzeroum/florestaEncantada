@@ -10,6 +10,10 @@ import {
   createMoleHoleObstacle,
   createMushroomObstacle,
 } from '../core/Obstacle.js';
+import { createBirdObstacle } from '../core/enemies/Bird.js';
+import { createSnakeObstacle } from '../core/enemies/Snake.js';
+import { createSpikeObstacle } from '../core/enemies/Spike.js';
+import { createBeeObstacle } from '../core/enemies/Bee.js';
 
 /**
  * @typedef {{ position:any, velocity:any, onGround:boolean, mesh:any }} Player
@@ -30,6 +34,14 @@ export function createObstacle(type, scene, x, z, options = {}) {
       return createMoleHoleObstacle(scene, x, z, { speed: options.speed });
     case 'mushroom':
       return createMushroomObstacle(scene, x, z, { speed: options.speed });
+    case 'bird':
+      return createBirdObstacle(scene, x, z, { speed: options.speed });
+    case 'snake':
+      return createSnakeObstacle(scene, x, z, { speed: options.speed });
+    case 'spike':
+      return createSpikeObstacle(scene, x, z);
+    case 'bee':
+      return createBeeObstacle(scene, x, z, { speed: options.speed });
     default:
       throw new Error(`Tipo de obstáculo desconhecido: ${type}`);
   }

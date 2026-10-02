@@ -18,7 +18,7 @@ export default {
       { type: 'mushroom', x: 24.5, z: 0 },
       { type: 'moleHole', x: 28, z: 0 },
       { type: 'mushroom', x: 31.5, z: 0 },
-      { type: 'log', x: 35, z: 0 },
+      { type: 'bee', x: 35, z: 0 },
     ],
     nuts: [
       { type: 'sphere', x: 2, z: 0 },
