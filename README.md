@@ -48,7 +48,25 @@ Abra http://localhost:5173 no navegador.
 | `npm run test:watch` | Testes em modo watch |
 | `npm run test:coverage` | Testes com cobertura |
 | `npm run a11y` | Verifica acessibilidade WCAG AA nos overlays (axe-core headless) |
+| `npx playwright test` | Roda testes E2E (requer Chrome com debug port) |
 | `./deploy.sh` | Deploy para VPS (requer `.env` configurado) |
+
+### Rodando testes E2E
+
+Os testes E2E usam `playwright-core` **conectando a um Chrome existente via CDP** — nenhum browser é baixado (~340 MB economizados). Para rodar:
+
+```bash
+# 1. Suba o servidor dev
+npm run dev
+
+# 2. Em outro terminal, abra um Chrome com debug port
+google-chrome --remote-debugging-port=9222 --user-data-dir="/tmp/chrome_session"
+
+# 3. Rode os testes E2E
+npx playwright test
+```
+
+Se você já tem um Chrome aberto com `--remote-debugging-port=9222`, o Playwright se conecta a ele diretamente — sem abrir janela nova. Os testes reaproveitam a aba que já está em `http://localhost:5173`.
 
 ## Status do projeto
 
