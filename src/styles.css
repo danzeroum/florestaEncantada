@@ -189,6 +189,78 @@ body {
   }
 }
 
+/* ── Menu inicial ────────────────────────────────── */
+
+.menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 30;
+  animation: victory-fade 0.3s ease-out;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.menu__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #ffffff;
+  transition: transform 0.15s ease-out, background 0.15s ease-out;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.menu__btn:hover:not([disabled]),
+.menu__btn:focus-visible:not([disabled]) {
+  transform: scale(1.1);
+  outline: 3px solid #ffeb3b;
+  outline-offset: 3px;
+}
+
+.menu__btn:active:not([disabled]) {
+  transform: scale(0.95);
+}
+
+.menu__btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.menu__btn--play {
+  background: #4caf50; /* verde — contraste 5.7:1 com branco */
+}
+
+.menu__btn--info {
+  background: #1976d2; /* azul — contraste 6.4:1 com branco */
+}
+
+.menu__btn--mute {
+  background: #e65100; /* laranja escuro — contraste 6.4:1 com branco */
+}
+
+/* Foco visível global (WCAG AA) */
+button:focus-visible {
+  outline: 3px solid #ffeb3b;
+  outline-offset: 3px;
+}
+
 /* ── Tela de game over ───────────────────────────── */
 
 .gameover {

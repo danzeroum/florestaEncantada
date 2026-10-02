@@ -3,6 +3,7 @@ import { createScene } from './core/scene.js';
 import { setupInput } from './core/input.js';
 import { startLoop } from './core/loop.js';
 import { createHUD } from './ui/HUD.js';
+import { createMenuUI } from './ui/MenuUI.js';
 import { createNut } from './core/Nut.js';
 import {
   createLogObstacle,
@@ -12,6 +13,7 @@ import {
 import { OBSTACLE_TYPES } from './core/Level.js';
 import { createLevelManager } from './core/LevelManager.js';
 import { createLifeManager } from './core/LifeManager.js';
+import { createGameState, STATES } from './state/GameState.js';
 
 const root = document.getElementById('root');
 if (!root) {
@@ -24,11 +26,13 @@ const { scene, camera, renderer, player, obstacles, nuts, particles } = createSc
 root.appendChild(renderer.domElement);
 setupInput();
 
+const gameState = createGameState(STATES.MENU);
+const levelManager = createLevelManager();
+
 let currentLoop = null;
 let hud = null;
 let lifeManager = null;
-
-const levelManager = createLevelManager();
+let menu = null;
 
 function createObstacle(type, x, z) {
   switch (type) {
@@ -82,26 +86,31 @@ function rebuildWorld() {
   }
 }
 
-function onGameOver() {
+function stopLoop() {
   if (currentLoop) {
     currentLoop.stop();
     currentLoop = null;
   }
+}
+
+function onGameOver() {
+  stopLoop();
+  gameState.set(STATES.GAME_OVER);
   if (hud) hud.showGameOver();
 }
 
 function loadPhase() {
-  if (currentLoop) {
-    currentLoop.stop();
-    currentLoop = null;
-  }
-
+  stopLoop();
   resetPlayer();
   rebuildWorld();
 
   if (lifeManager) lifeManager.reset();
-  if (hud) hud.setLives(lifeManager.getLives(), INITIAL_LIVES);
-  if (hud) hud.setScore(0, nuts.length);
+  if (hud) {
+    hud.setLives(lifeManager.getLives(), INITIAL_LIVES);
+    hud.setScore(0, nuts.length);
+  }
+
+  gameState.set(STATES.RUNNING);
 
   currentLoop = startLoop({
     scene,
@@ -118,10 +127,8 @@ function loadPhase() {
 }
 
 function onPhaseComplete() {
-  if (currentLoop) {
-    currentLoop.stop();
-    currentLoop = null;
-  }
+  stopLoop();
+  gameState.set(STATES.VICTORY);
   const info = levelManager.getCurrent();
   if (hud) {
     hud.showVictory({
@@ -135,22 +142,45 @@ function goToNextPhase() {
   if (levelManager.next()) {
     loadPhase();
   } else {
-    startGame(); // fallback: reinicia tudo se não houver próxima fase
+    startNewGame();
   }
 }
 
-function startGame() {
+function startNewGame() {
   levelManager.reset();
   lifeManager = lifeManager ?? createLifeManager(INITIAL_LIVES, undefined, onGameOver);
   lifeManager.reset();
 
   if (hud) hud.dispose();
-  hud = createHUD(root, { onReplay: startGame });
+  hud = createHUD(root, { onReplay: startNewGame });
 
   loadPhase();
 }
 
-startGame();
+function showMenu() {
+  stopLoop();
+  if (hud) hud.hideVictory();
+  if (hud) hud.hideGameOver();
+  gameState.set(STATES.MENU);
+  menu.show();
+}
+
+function hideMenu() {
+  menu.hide();
+}
+
+menu = createMenuUI(root, {
+  onPlay: () => {
+    hideMenu();
+    startNewGame();
+  },
+  onHowToPlay: () => {
+    // Fase 4.2 vai implementar. Por enquanto, não faz nada.
+  },
+  muteEnabled: false,
+});
+
+showMenu();
 
 function onResize() {
   const width = window.innerWidth;
