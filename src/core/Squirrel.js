@@ -6,8 +6,9 @@ const CABECA_COLOR = 0xffa726;
 const RABO_COLOR = 0x795548;
 const OLHO_COLOR = 0xffffff;
 
-export const SQUIRREL_RADIUS = 0.6;
+export const SQUIRREL_WIDTH = 1.2;
 export const SQUIRREL_HEIGHT = 1.4;
+export const SQUIRREL_DEPTH = 1.2;
 
 /**
  * Cria o esquilo geométrico (placeholder até glTF licenciado).
@@ -67,6 +68,6 @@ export function createSquirrel(scene) {
     position: { x: 0, y: GROUND_Y, z: 0 },
     velocity: { x: 0, y: 0, z: 0 },
     onGround: true,
-    collider: { radius: SQUIRREL_RADIUS, height: SQUIRREL_HEIGHT },
+    collider: { width: SQUIRREL_WIDTH, height: SQUIRREL_HEIGHT, depth: SQUIRREL_DEPTH },
   };
 }

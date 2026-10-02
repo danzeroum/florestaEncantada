@@ -48,7 +48,7 @@ export function createScene() {
   const player = createSquirrel(scene);
 
   // ── Obstáculos ──
-  const obstacles = [createLogObstacle(scene, 5, 0), createLogObstacle(scene, 9, -3)];
+  const obstacles = [createLogObstacle(scene, 5, 0), createLogObstacle(scene, 10, 0)];
 
   // ── Renderer ──
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });

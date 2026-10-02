@@ -40,7 +40,12 @@ vi.mock('three', () => {
   };
 });
 
-import { createSquirrel, SQUIRREL_RADIUS, SQUIRREL_HEIGHT } from './Squirrel.js';
+import {
+  createSquirrel,
+  SQUIRREL_WIDTH,
+  SQUIRREL_HEIGHT,
+  SQUIRREL_DEPTH,
+} from './Squirrel.js';
 
 describe('createSquirrel', () => {
   const fakeScene = () => ({ add: vi.fn() });
@@ -58,10 +63,11 @@ describe('createSquirrel', () => {
     expect(player.onGround).toBe(true);
   });
 
-  it('has collider with expected radius and height', () => {
+  it('has collider with expected width, height and depth', () => {
     const player = createSquirrel(fakeScene());
-    expect(player.collider.radius).toBe(SQUIRREL_RADIUS);
+    expect(player.collider.width).toBe(SQUIRREL_WIDTH);
     expect(player.collider.height).toBe(SQUIRREL_HEIGHT);
+    expect(player.collider.depth).toBe(SQUIRREL_DEPTH);
   });
 
   it('mesh has all 7 body parts', () => {

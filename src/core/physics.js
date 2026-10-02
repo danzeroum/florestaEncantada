@@ -1,6 +1,14 @@
 /**
  * Física AABB caseira — sem engine externa.
  * Zero dependência de Three.js: puro JS, testável em Node.
+ *
+ * Convenção de collider: extensões TOTAIS por eixo, com `position.y` sendo a BASE.
+ *   - baseY = position.y
+ *   - topY  = position.y + collider.height
+ *
+ * @typedef {{x:number,y:number,z:number}} Vec3
+ * @typedef {{width:number,height:number,depth:number}} Collider
+ * @typedef {{position:Vec3, collider:Collider}} Box
  */
 
 export const GRAVITY = -18;
@@ -9,30 +17,35 @@ export const JUMP_VELOCITY = 7.5;
 export const JUMP_COOLDOWN = 0.3;
 
 /**
- * Verifica colisão AABB simplificada (caixas alinhadas nos eixos).
- * Considera `position` como centro e `collider` como { radius, height }.
+ * Verifica colisão AABB entre duas caixas.
+ * `position` é a base (pé) do objeto; `height` sobe a partir dela.
  *
- * @param {{position:{x:number,y:number,z:number}, collider:{radius:number,height:number}}} a
- * @param {{position:{x:number,y:number,z:number}, collider:{radius:number,height:number}}} b
+ * @param {Box} a
+ * @param {Box} b
  * @returns {boolean}
  */
 export function checkCollision(a, b) {
   const dx = Math.abs(a.position.x - b.position.x);
-  const dy = Math.abs(a.position.y - b.position.y);
   const dz = Math.abs(a.position.z - b.position.z);
 
-  const overlapX = dx < a.collider.radius + b.collider.radius;
-  const overlapZ = dz < a.collider.radius + b.collider.radius;
-  const overlapY = dy < (a.collider.height + b.collider.height) / 2;
+  const overlapX = dx < (a.collider.width + b.collider.width) / 2;
+  const overlapZ = dz < (a.collider.depth + b.collider.depth) / 2;
 
-  return overlapX && overlapZ && overlapY;
+  const aBase = a.position.y;
+  const aTop = a.position.y + a.collider.height;
+  const bBase = b.position.y;
+  const bTop = b.position.y + b.collider.height;
+
+  const overlapY = aBase < bTop && aTop > bBase;
+
+  return overlapX && overlapY && overlapZ;
 }
 
 /**
  * Aplica gravidade e resolve colisão com o chão.
  * Muta `velocity.y` e `position.y` do estado. Seta `onGround`.
  *
- * @param {{position:{x:number,y:number,z:number}, velocity:{x:number,y:number,z:number}, onGround:boolean}} state
+ * @param {{position:Vec3, velocity:Vec3, onGround:boolean}} state
  * @param {number} deltaTime em segundos
  */
 export function applyGravity(state, deltaTime) {
@@ -50,26 +63,34 @@ export function applyGravity(state, deltaTime) {
 
 /**
  * Calcula o vetor de resolução (push-out) entre dois colliders sobrepostos.
- * Retorna o deslocamento a aplicar no player para sair do obstáculo.
- * Empurra apenas no eixo X (jogo é de plataforma lateral).
+ * Empurra no eixo de MENOR penetração (X ou Z) — evita empurrar "errado"
+ * quando o player está ao lado de um obstáculo mais profundo em Z.
  *
- * @param {{position:{x:number,z:number}, collider:{radius:number}}} player
- * @param {{position:{x:number,z:number}, collider:{radius:number}}} obstacle
+ * @param {Box} player
+ * @param {Box} obstacle
  * @returns {{x:number, z:number}}
  */
 export function resolveCollision(player, obstacle) {
   const dx = player.position.x - obstacle.position.x;
   const dz = player.position.z - obstacle.position.z;
-  const minDist = player.collider.radius + obstacle.collider.radius;
-  const dist = Math.hypot(dx, dz);
 
-  if (dist >= minDist || dist === 0) {
+  const halfW = (player.collider.width + obstacle.collider.width) / 2;
+  const halfD = (player.collider.depth + obstacle.collider.depth) / 2;
+
+  const overlapX = halfW - Math.abs(dx);
+  const overlapZ = halfD - Math.abs(dz);
+
+  if (overlapX <= 0 || overlapZ <= 0) {
     return { x: 0, z: 0 };
   }
 
-  const overlap = minDist - dist;
-  const nx = dx / dist;
-  const nz = dz / dist;
+  const MARGIN = 0.05;
 
-  return { x: nx * (overlap + 0.05), z: nz * (overlap + 0.05) };
+  if (overlapX < overlapZ) {
+    const sign = dx === 0 ? 1 : Math.sign(dx);
+    return { x: sign * (overlapX + MARGIN), z: 0 };
+  }
+
+  const sign = dz === 0 ? 1 : Math.sign(dz);
+  return { x: 0, z: sign * (overlapZ + MARGIN) };
 }

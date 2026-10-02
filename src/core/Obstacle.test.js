@@ -41,9 +41,10 @@ describe('createLogObstacle', () => {
     expect(obstacle.mesh.rotation.x).toBeCloseTo(Math.PI / 2, 5);
   });
 
-  it('has collider with expected dimensions', () => {
+  it('has collider with expected dimensions (log lying on Z axis)', () => {
     const obstacle = createLogObstacle(fakeScene(), 0, 0);
-    expect(obstacle.collider.radius).toBe(0.5);
-    expect(obstacle.collider.height).toBe(2.2);
+    expect(obstacle.collider.width).toBe(1.0);
+    expect(obstacle.collider.height).toBe(1.0);
+    expect(obstacle.collider.depth).toBe(2.2);
   });
 });
