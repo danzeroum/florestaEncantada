@@ -91,7 +91,7 @@ export function createGameController(deps) {
 
     const { phase, layout } = levelManager.getCurrent();
     if (phase?.theme && typeof applyTheme === 'function') applyTheme(phase.theme);
-    rebuildWorld({ scene, obstacles, nuts }, layout);
+    rebuildWorld({ scene, obstacles, nuts, powerUps }, layout);
 
     if (lifeManager) lifeManager.reset();
     if (hud) {

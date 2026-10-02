@@ -133,6 +133,16 @@ export function startApp(root) {
   }
   window.addEventListener('keydown', onKeyDown);
 
+  // Modo debug: Ctrl+Shift+D desbloqueia todas as fases (apenas na sessão)
+  function onDebugKey(event) {
+    if (event.ctrlKey && event.shiftKey && (event.key === 'D' || event.key === 'd')) {
+      const total = levelManager.getTotal();
+      for (let i = 0; i < total; i++) progressManager.complete(i);
+      console.warn(`[debug] Fases desbloqueadas: ${total}/${total}`);
+    }
+  }
+  window.addEventListener('keydown', onDebugKey);
+
   // Resize
   function onResize() {
     const width = window.innerWidth;
@@ -147,6 +157,7 @@ export function startApp(root) {
 
   function dispose() {
     window.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('keydown', onDebugKey);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('pointerdown', unlockAudioOnce);
     window.removeEventListener('keydown', unlockAudioOnce);
