@@ -41,6 +41,7 @@ export function createGameController(deps) {
     menu,
     howTo,
     pause,
+    applyTheme,
   } = deps;
 
   let currentLoop = null;
@@ -80,7 +81,8 @@ export function createGameController(deps) {
     stopLoop();
     resetPlayer(player);
 
-    const { layout } = levelManager.getCurrent();
+    const { phase, layout } = levelManager.getCurrent();
+    if (phase?.theme && typeof applyTheme === 'function') applyTheme(phase.theme);
     rebuildWorld({ scene, obstacles, nuts }, layout);
 
     if (lifeManager) lifeManager.reset();

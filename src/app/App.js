@@ -5,6 +5,7 @@
 
 import { createScene } from '../core/scene.js';
 import { setupInput } from '../core/input.js';
+import { PHASES } from '../data/phases/index.js';
 import { createMenuUI } from '../ui/MenuUI.js';
 import { createHowToPlayUI } from '../ui/HowToPlayUI.js';
 import { createPauseUI } from '../ui/PauseUI.js';
@@ -25,7 +26,10 @@ export function startApp(root) {
 
   const errorBoundary = installErrorBoundary(root);
 
-  const { scene, camera, renderer, player, obstacles, nuts, particles } = createScene();
+  // Cria a cena com o tema da primeira fase
+  const firstTheme = PHASES[0]?.theme ?? {};
+  const { scene, camera, renderer, player, obstacles, nuts, particles, applyTheme } =
+    createScene(firstTheme);
   root.appendChild(renderer.domElement);
   errorBoundary.attachCanvas(renderer.domElement);
   setupInput();
@@ -90,6 +94,7 @@ export function startApp(root) {
     menu,
     howTo,
     pause,
+    applyTheme,
   });
 
   // Desbloqueia o áudio no primeiro gesto (regra dos navegadores)

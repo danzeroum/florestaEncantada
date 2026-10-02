@@ -1,41 +1,26 @@
 import * as THREE from 'three';
 import { createSquirrel } from './Squirrel.js';
-import {
-  createLogObstacle,
-  createMoleHoleObstacle,
-  createMushroomObstacle,
-} from './Obstacle.js';
-import { createNut } from './Nut.js';
-import { createLevel, OBSTACLE_TYPES } from './Level.js';
 import { createParticleSystem } from './ParticleSystem.js';
 
 /**
- * Cria o obstáculo correto conforme o tipo definido no layout.
+ * Cria a cena base (céu, câmera, luzes, chão, player, partículas).
+ * Obstáculos e nozes são criados pelo WorldBuilder, a partir do layout da fase.
+ *
+ * Aplica o tema da fase se fornecido (cores de céu, chão, intensidade de luz).
+ *
+ * @param {{ sky?:number, ground?:number, ambient?:number }} [theme]
  */
-function createObstacle(scene, type, x, z) {
-  switch (type) {
-    case OBSTACLE_TYPES.LOG:
-      return createLogObstacle(scene, x, z);
-    case OBSTACLE_TYPES.MOLE_HOLE:
-      return createMoleHoleObstacle(scene, x, z);
-    case OBSTACLE_TYPES.MUSHROOM:
-      return createMushroomObstacle(scene, x, z);
-    default:
-      throw new Error(`Tipo de obstáculo desconhecido: ${type}`);
-  }
-}
+export function createScene(theme = {}) {
+  const skyColor = theme.sky ?? 0xb3e5fc;
+  const groundColor = theme.ground ?? 0x4caf50;
+  const ambientIntensity = theme.ambient ?? 0.7;
 
-/**
- * Monta a cena da Fase 3.2: chão, céu, luzes, esquilo, obstáculos
- * (troncos + toca-toca + cogumelo), nozes coletáveis e partículas.
- */
-export function createScene() {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xb3e5fc);
+  scene.background = new THREE.Color(skyColor);
 
-  // ── Céu ──
+  // ── Céu (esfera vista de dentro) ──
   const skyGeo = new THREE.SphereGeometry(100, 32, 16);
-  const skyMat = new THREE.MeshBasicMaterial({ color: 0xb3e5fc, side: THREE.BackSide });
+  const skyMat = new THREE.MeshBasicMaterial({ color: skyColor, side: THREE.BackSide });
   const sky = new THREE.Mesh(skyGeo, skyMat);
   sky.name = 'sky';
   scene.add(sky);
@@ -51,7 +36,8 @@ export function createScene() {
   camera.lookAt(0, 1, 0);
 
   // ── Luzes ──
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
+  ambientLight.name = 'ambientLight';
   scene.add(ambientLight);
 
   const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
@@ -59,8 +45,8 @@ export function createScene() {
   scene.add(dirLight);
 
   // ── Chão ──
-  const groundGeo = new THREE.PlaneGeometry(60, 40);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.9 });
+  const groundGeo = new THREE.PlaneGeometry(100, 40);
+  const groundMat = new THREE.MeshStandardMaterial({ color: groundColor, roughness: 0.9 });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.name = 'ground';
@@ -68,13 +54,6 @@ export function createScene() {
 
   // ── Player ──
   const player = createSquirrel(scene);
-
-  // ── Obstáculos (do layout) ──
-  const level = createLevel();
-  const obstacles = level.obstacles.map(o => createObstacle(scene, o.type, o.x, o.z));
-
-  // ── Nozes ──
-  const nuts = level.nuts.map(n => createNut(scene, n.type, n.x, n.z));
 
   // ── Partículas ──
   const particles = createParticleSystem(scene);
@@ -85,5 +64,35 @@ export function createScene() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
 
-  return { scene, camera, renderer, player, obstacles, nuts, particles };
+  /**
+   * Aplica um tema à cena já montada (usado ao trocar de fase).
+   * @param {{ sky?:number, ground?:number, ambient?:number }} nextTheme
+   */
+  function applyTheme(nextTheme = {}) {
+    if (nextTheme.sky !== undefined) {
+      scene.background.set(nextTheme.sky);
+      sky.material.color.set(nextTheme.sky);
+    }
+    if (nextTheme.ground !== undefined) {
+      ground.material.color.set(nextTheme.ground);
+    }
+    if (nextTheme.ambient !== undefined) {
+      ambientLight.intensity = nextTheme.ambient;
+    }
+  }
+
+  // Arrays mutáveis — WorldBuilder preenche e limpa
+  const obstacles = [];
+  const nuts = [];
+
+  return {
+    scene,
+    camera,
+    renderer,
+    player,
+    obstacles,
+    nuts,
+    particles,
+    applyTheme,
+  };
 }
