@@ -4,6 +4,12 @@ import { setupInput } from './core/input.js';
 import { startLoop } from './core/loop.js';
 import { createHUD } from './ui/HUD.js';
 import { createNut } from './core/Nut.js';
+import {
+  createLogObstacle,
+  createMoleHoleObstacle,
+  createMushroomObstacle,
+} from './core/Obstacle.js';
+import { createLevel, OBSTACLE_TYPES } from './core/Level.js';
 import { createLifeManager } from './core/LifeManager.js';
 
 const root = document.getElementById('root');
@@ -21,11 +27,31 @@ let currentLoop = null;
 let hud = null;
 let lifeManager = null;
 
-const STARTING_NUT_LAYOUT = nuts.map(n => ({
-  type: n.type,
-  x: n.position.x,
-  z: n.position.z,
-}));
+const LEVEL = createLevel();
+
+function createObstacle(type, x, z) {
+  switch (type) {
+    case OBSTACLE_TYPES.LOG:
+      return createLogObstacle(scene, x, z);
+    case OBSTACLE_TYPES.MOLE_HOLE:
+      return createMoleHoleObstacle(scene, x, z);
+    case OBSTACLE_TYPES.MUSHROOM:
+      return createMushroomObstacle(scene, x, z);
+    default:
+      throw new Error(`Tipo de obstáculo desconhecido: ${type}`);
+  }
+}
+
+function disposeMesh(mesh) {
+  if (!mesh) return;
+  if (mesh.parent) mesh.parent.remove(mesh);
+  mesh.traverse?.(child => {
+    child.geometry?.dispose?.();
+    child.material?.dispose?.();
+  });
+  mesh.geometry?.dispose?.();
+  mesh.material?.dispose?.();
+}
 
 function resetPlayer() {
   player.position.x = 0;
@@ -39,17 +65,17 @@ function resetPlayer() {
   player.mesh.scale.set(1, 1, 1);
 }
 
-function rebuildNuts() {
-  for (const nut of nuts) {
-    if (nut.mesh && nut.mesh.parent) {
-      nut.mesh.parent.remove(nut.mesh);
-    }
-    nut.mesh?.geometry?.dispose?.();
-    nut.mesh?.material?.dispose?.();
-  }
+function rebuildWorld() {
+  for (const nut of nuts) disposeMesh(nut.mesh);
   nuts.length = 0;
-  for (const item of STARTING_NUT_LAYOUT) {
+  for (const item of LEVEL.nuts) {
     nuts.push(createNut(scene, item.type, item.x, item.z));
+  }
+
+  for (const obstacle of obstacles) disposeMesh(obstacle.mesh);
+  obstacles.length = 0;
+  for (const item of LEVEL.obstacles) {
+    obstacles.push(createObstacle(item.type, item.x, item.z));
   }
 }
 
@@ -68,7 +94,7 @@ function startGame() {
   }
 
   resetPlayer();
-  rebuildNuts();
+  rebuildWorld();
 
   if (hud) hud.dispose();
   hud = createHUD(root, { onReplay: startGame });

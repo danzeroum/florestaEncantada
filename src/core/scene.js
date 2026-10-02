@@ -1,16 +1,35 @@
 import * as THREE from 'three';
 import { createSquirrel } from './Squirrel.js';
-import { createLogObstacle } from './Obstacle.js';
-import { createNut, NUT_TYPES } from './Nut.js';
-import { createLevel } from './Level.js';
+import {
+  createLogObstacle,
+  createMoleHoleObstacle,
+  createMushroomObstacle,
+} from './Obstacle.js';
+import { createNut } from './Nut.js';
+import { createLevel, OBSTACLE_TYPES } from './Level.js';
 import { createParticleSystem } from './ParticleSystem.js';
 
 /**
- * Monta a cena da Fase 2: chão, céu, luzes, esquilo, troncos,
- * nozes coletáveis e sistema de partículas.
+ * Cria o obstáculo correto conforme o tipo definido no layout.
+ */
+function createObstacle(scene, type, x, z) {
+  switch (type) {
+    case OBSTACLE_TYPES.LOG:
+      return createLogObstacle(scene, x, z);
+    case OBSTACLE_TYPES.MOLE_HOLE:
+      return createMoleHoleObstacle(scene, x, z);
+    case OBSTACLE_TYPES.MUSHROOM:
+      return createMushroomObstacle(scene, x, z);
+    default:
+      throw new Error(`Tipo de obstáculo desconhecido: ${type}`);
+  }
+}
+
+/**
+ * Monta a cena da Fase 3.2: chão, céu, luzes, esquilo, obstáculos
+ * (troncos + toca-toca + cogumelo), nozes coletáveis e partículas.
  */
 export function createScene() {
-  // ── Cena ──
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xb3e5fc);
 
@@ -40,7 +59,7 @@ export function createScene() {
   scene.add(dirLight);
 
   // ── Chão ──
-  const groundGeo = new THREE.PlaneGeometry(40, 40);
+  const groundGeo = new THREE.PlaneGeometry(60, 40);
   const groundMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.9 });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
@@ -50,11 +69,12 @@ export function createScene() {
   // ── Player ──
   const player = createSquirrel(scene);
 
-  // ── Obstáculos ──
-  const obstacles = [createLogObstacle(scene, 5, 0), createLogObstacle(scene, 10, 0)];
+  // ── Obstáculos (do layout) ──
+  const level = createLevel();
+  const obstacles = level.obstacles.map(o => createObstacle(scene, o.type, o.x, o.z));
 
   // ── Nozes ──
-  const nuts = createLevel().map(n => createNut(scene, n.type, n.x, n.z));
+  const nuts = level.nuts.map(n => createNut(scene, n.type, n.x, n.z));
 
   // ── Partículas ──
   const particles = createParticleSystem(scene);
@@ -67,5 +87,3 @@ export function createScene() {
 
   return { scene, camera, renderer, player, obstacles, nuts, particles };
 }
-
-export { NUT_TYPES };
