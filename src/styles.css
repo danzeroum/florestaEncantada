@@ -442,6 +442,52 @@ button:focus-visible {
   background: #ab47bc;
 }
 
+/* ── Error boundary ──────────────────────────────── */
+
+.error-boundary {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 100;
+  animation: victory-fade 0.3s ease-out;
+}
+
+.error-boundary[hidden] {
+  display: none;
+}
+
+.error-boundary__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.error-boundary__reload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border: none;
+  border-radius: 50%;
+  background: #ffb300;
+  color: #212121;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease-out;
+}
+
+.error-boundary__reload:hover,
+.error-boundary__reload:focus-visible {
+  transform: scale(1.08);
+  outline: 3px solid #ffeb3b;
+  outline-offset: 3px;
+}
+
 /* ── Tela de game over ───────────────────────────── */
 
 .gameover {

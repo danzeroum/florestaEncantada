@@ -17,6 +17,8 @@ import { createLevelManager } from './core/LevelManager.js';
 import { createLifeManager } from './core/LifeManager.js';
 import { createAudioManager } from './core/AudioManager.js';
 import { createGameState, STATES } from './state/GameState.js';
+import { installErrorBoundary } from './app/ErrorBoundary.js';
+import { focusGameCanvas } from './utils/focus.js';
 
 const root = document.getElementById('root');
 if (!root) {
@@ -25,8 +27,11 @@ if (!root) {
 
 const INITIAL_LIVES = 3;
 
+const errorBoundary = installErrorBoundary(root);
+
 const { scene, camera, renderer, player, obstacles, nuts, particles } = createScene();
 root.appendChild(renderer.domElement);
+errorBoundary.attachCanvas(renderer.domElement);
 setupInput();
 
 const gameState = createGameState(STATES.MENU);
@@ -183,6 +188,7 @@ function showPause() {
 
 function hidePauseAndResume() {
   pause.hide();
+  focusGameCanvas(renderer.domElement);
   if (gameState.is(STATES.PAUSED)) {
     gameState.set(STATES.RUNNING);
     currentLoop = startLoop({
@@ -212,6 +218,7 @@ menu = createMenuUI(root, {
   onPlay: () => {
     audio.unlock();
     menu.hide();
+    focusGameCanvas(renderer.domElement);
     startNewGame();
   },
   onHowToPlay: () => {
@@ -231,6 +238,7 @@ howTo = createHowToPlayUI(root, {
   onBack: () => {
     howTo.hide();
     showMenu();
+    focusGameCanvas(renderer.domElement);
   },
 });
 
