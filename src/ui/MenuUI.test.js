@@ -13,9 +13,17 @@ describe('createMenuUI', () => {
     root.remove();
   });
 
-  it('creates 3 buttons (Play, HowTo, Mute)', () => {
+  it('creates 4 buttons (Play, Map, HowTo, Mute)', () => {
     const ui = createMenuUI(root);
-    expect(root.querySelectorAll('button').length).toBe(3);
+    expect(root.querySelectorAll('button').length).toBe(4);
+    ui.dispose();
+  });
+
+  it('calls onOpenMap when Map is clicked', () => {
+    const onOpenMap = vi.fn();
+    const ui = createMenuUI(root, { onOpenMap });
+    root.querySelector('.menu__btn--map').click();
+    expect(onOpenMap).toHaveBeenCalledOnce();
     ui.dispose();
   });
 

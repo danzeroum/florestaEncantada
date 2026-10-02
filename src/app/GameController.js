@@ -42,6 +42,8 @@ export function createGameController(deps) {
     howTo,
     pause,
     applyTheme,
+    progressManager,
+    levelMap,
   } = deps;
 
   let currentLoop = null;
@@ -99,10 +101,18 @@ export function createGameController(deps) {
     stopLoop();
     gameState.set(STATES.VICTORY);
     const info = levelManager.getCurrent();
+
+    // Marca a fase como completada no progresso da sessão
+    if (progressManager) progressManager.complete(info.index);
+
+    const isLast = info.isLast;
+    const isFinalVictory = isLast && progressManager?.getCompletedCount() === levelManager.getTotal();
+
     if (hud) {
       hud.showVictory({
-        isLast: info.isLast,
-        onNext: info.isLast ? undefined : goToNextPhase,
+        isLast,
+        isFinalVictory,
+        onNext: isLast ? undefined : goToNextPhase,
       });
     }
   }
@@ -157,6 +167,21 @@ export function createGameController(deps) {
     showMenu();
   }
 
+  /**
+   * Salta diretamente para uma fase escolhida no mapa.
+   * @param {number} index índice da fase (0-based)
+   */
+  function selectPhase(index) {
+    if (!progressManager || !progressManager.isUnlocked(index)) return;
+    if (levelMap) levelMap.hide();
+
+    // Reposiciona o LevelManager na fase escolhida
+    levelManager.reset();
+    for (let i = 0; i < index; i++) levelManager.next();
+
+    startNewGame();
+  }
+
   function handleEscape() {
     if (gameState.is(STATES.RUNNING)) {
       showPause();
@@ -171,6 +196,11 @@ export function createGameController(deps) {
       showMenu();
       return true;
     }
+    if (levelMap && levelMap.isVisible()) {
+      levelMap.hide();
+      showMenu();
+      return true;
+    }
     return false;
   }
 
@@ -182,6 +212,7 @@ export function createGameController(deps) {
     hidePauseAndResume,
     quitToMenu,
     goToNextPhase,
+    selectPhase,
     handleEscape,
     stopLoop,
     getHud: () => hud,

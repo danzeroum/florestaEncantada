@@ -9,7 +9,9 @@ import { PHASES } from '../data/phases/index.js';
 import { createMenuUI } from '../ui/MenuUI.js';
 import { createHowToPlayUI } from '../ui/HowToPlayUI.js';
 import { createPauseUI } from '../ui/PauseUI.js';
+import { createLevelMapUI } from '../ui/LevelMapUI.js';
 import { createAudioManager } from '../core/AudioManager.js';
+import { createProgressManager } from '../core/ProgressManager.js';
 import { createGameState, STATES } from '../state/GameState.js';
 import { createLevelManager } from '../core/LevelManager.js';
 import { installErrorBoundary } from './ErrorBoundary.js';
@@ -37,6 +39,7 @@ export function startApp(root) {
   const gameState = createGameState(STATES.MENU);
   const levelManager = createLevelManager();
   const audio = createAudioManager();
+  const progressManager = createProgressManager(levelManager.getTotal());
 
   // UIs são criadas com referências aos callbacks do controller.
   // Como o controller é criado depois, usamos um proxy que resolve no primeiro uso.
@@ -53,6 +56,10 @@ export function startApp(root) {
       menu.hide();
       gameState.set(STATES.HOW_TO_PLAY);
       howTo.show();
+    },
+    onOpenMap: () => {
+      menu.hide();
+      levelMap.show(progressManager);
     },
     onToggleMute: () => {
       audio.unlock();
@@ -79,6 +86,16 @@ export function startApp(root) {
     onQuit: () => controller.quitToMenu(),
   });
 
+  const levelMap = createLevelMapUI(root, {
+    totalPhases: levelManager.getTotal(),
+    onSelect: index => controller.selectPhase(index),
+    onBack: () => {
+      levelMap.hide();
+      controller.showMenu();
+      focusGameCanvas(renderer.domElement);
+    },
+  });
+
   controller = createGameController({
     root,
     scene,
@@ -94,7 +111,9 @@ export function startApp(root) {
     menu,
     howTo,
     pause,
+    levelMap,
     applyTheme,
+    progressManager,
   });
 
   // Desbloqueia o áudio no primeiro gesto (regra dos navegadores)

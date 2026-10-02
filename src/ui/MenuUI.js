@@ -25,6 +25,15 @@ const SOUND_ON_ICON_SVG = `
   </svg>
 `;
 
+const MAP_ICON_SVG = `
+  <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" focusable="false">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+  </svg>
+`;
+
 const SOUND_OFF_ICON_SVG = `
   <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" focusable="false">
     <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
@@ -44,6 +53,7 @@ export function createMenuUI(root, options = {}) {
 
   const onPlay = options.onPlay ?? (() => {});
   const onHowToPlay = options.onHowToPlay ?? (() => {});
+  const onOpenMap = options.onOpenMap ?? (() => {});
   const onToggleMute = options.onToggleMute ?? (() => {});
   const muteEnabled = options.muteEnabled === true;
 
@@ -86,6 +96,13 @@ export function createMenuUI(root, options = {}) {
     onClick: () => onHowToPlay(),
   });
 
+  const mapBtn = makeButton({
+    className: 'menu__btn--map',
+    label: 'Mapa de fases',
+    innerHTML: MAP_ICON_SVG,
+    onClick: () => onOpenMap(),
+  });
+
   const muteBtn = makeButton({
     className: 'menu__btn--mute',
     label: muteEnabled ? 'Ligar/desligar som' : 'Som ainda não disponível',
@@ -103,6 +120,7 @@ export function createMenuUI(root, options = {}) {
   }
 
   inner.appendChild(playBtn);
+  inner.appendChild(mapBtn);
   inner.appendChild(howToBtn);
   inner.appendChild(muteBtn);
   overlay.appendChild(inner);
