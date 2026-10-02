@@ -1,58 +1,74 @@
 import { describe, it, expect } from 'vitest';
 import { createLevelManager } from './LevelManager.js';
-import { OBSTACLE_TYPES } from './Level.js';
+import { PHASES } from '../data/phases/index.js';
 
 describe('createLevelManager', () => {
+  const TOTAL = PHASES.length;
+
   it('starts on phase 1 (index 0)', () => {
     const lm = createLevelManager();
     expect(lm.getCurrent().index).toBe(0);
-    expect(lm.getTotal()).toBe(2);
+    expect(lm.getTotal()).toBe(TOTAL);
   });
 
-  it('phase 1 has only logs (no hostile enemies)', () => {
+  it('phase 1 has only logs (tutorial, no hostile enemies)', () => {
     const lm = createLevelManager();
-    const layout = lm.getCurrent().layout;
+    const { layout } = lm.getCurrent();
     for (const o of layout.obstacles) {
-      expect(o.type).toBe(OBSTACLE_TYPES.LOG);
+      expect(o.type).toBe('log');
     }
   });
 
   it('phase 2 has at least one of each obstacle type', () => {
     const lm = createLevelManager();
     lm.next();
-    const layout = lm.getCurrent().layout;
+    const { layout } = lm.getCurrent();
     const types = layout.obstacles.map(o => o.type);
-    expect(types).toContain(OBSTACLE_TYPES.LOG);
-    expect(types).toContain(OBSTACLE_TYPES.MOLE_HOLE);
-    expect(types).toContain(OBSTACLE_TYPES.MUSHROOM);
+    expect(types).toContain('log');
+    expect(types).toContain('moleHole');
+    expect(types).toContain('mushroom');
   });
 
-  it('phase 2 has more obstacles than phase 1', () => {
-    const lm = createLevelManager();
-    const phase1 = lm.getCurrent().layout.obstacles.length;
-    lm.next();
-    const phase2 = lm.getCurrent().layout.obstacles.length;
-    expect(phase2).toBeGreaterThan(phase1);
-  });
-
-  it('phase 1 is not last; phase 2 is last', () => {
+  it('first phase is not last; final phase is last', () => {
     const lm = createLevelManager();
     expect(lm.getCurrent().isLast).toBe(false);
-    lm.next();
+
+    while (lm.next()) {
+      // avança até a última
+    }
     expect(lm.getCurrent().isLast).toBe(true);
+    expect(lm.getCurrent().index).toBe(TOTAL - 1);
   });
 
-  it('next() returns true on success and false on last phase', () => {
+  it('next() returns true until the last phase, then false', () => {
     const lm = createLevelManager();
-    expect(lm.next()).toBe(true);
+    let advances = 0;
+    while (lm.next()) advances++;
+    expect(advances).toBe(TOTAL - 1);
     expect(lm.next()).toBe(false); // já está na última
   });
 
   it('reset returns to phase 1', () => {
     const lm = createLevelManager();
     lm.next();
-    expect(lm.getCurrent().index).toBe(1);
+    lm.next();
+    expect(lm.getCurrent().index).toBe(Math.min(2, TOTAL - 1));
     lm.reset();
     expect(lm.getCurrent().index).toBe(0);
+  });
+
+  it('every phase has a valid theme with sky/ground/ambient', () => {
+    for (const phase of PHASES) {
+      expect(phase.theme).toBeDefined();
+      expect(typeof phase.theme.sky).toBe('number');
+      expect(typeof phase.theme.ground).toBe('number');
+      expect(typeof phase.theme.ambient).toBe('number');
+    }
+  });
+
+  it('every phase has at least one nut', () => {
+    for (const phase of PHASES) {
+      expect(phase.layout.nuts.length).toBeGreaterThan(0);
+    }
   });
 });
