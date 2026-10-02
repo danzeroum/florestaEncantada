@@ -15,6 +15,7 @@ import {
 import { OBSTACLE_TYPES } from './core/Level.js';
 import { createLevelManager } from './core/LevelManager.js';
 import { createLifeManager } from './core/LifeManager.js';
+import { createAudioManager } from './core/AudioManager.js';
 import { createGameState, STATES } from './state/GameState.js';
 
 const root = document.getElementById('root');
@@ -30,6 +31,7 @@ setupInput();
 
 const gameState = createGameState(STATES.MENU);
 const levelManager = createLevelManager();
+const audio = createAudioManager();
 
 let currentLoop = null;
 let hud = null;
@@ -127,6 +129,7 @@ function loadPhase() {
     hud,
     lifeManager,
     onPhaseComplete,
+    audio,
   });
 }
 
@@ -193,6 +196,7 @@ function hidePauseAndResume() {
       hud,
       lifeManager,
       onPhaseComplete,
+      audio,
     });
   }
 }
@@ -206,6 +210,7 @@ function quitToMenu() {
 
 menu = createMenuUI(root, {
   onPlay: () => {
+    audio.unlock();
     menu.hide();
     startNewGame();
   },
@@ -214,7 +219,12 @@ menu = createMenuUI(root, {
     gameState.set(STATES.HOW_TO_PLAY);
     howTo.show();
   },
-  muteEnabled: false,
+  onToggleMute: () => {
+    audio.unlock();
+    audio.setMuted(!audio.isMuted());
+    menu.setMuted(audio.isMuted());
+  },
+  muteEnabled: true,
 });
 
 howTo = createHowToPlayUI(root, {
@@ -234,6 +244,15 @@ pause = createPauseUI(root, {
 });
 
 // ── ESC pausa/despausa ──
+
+// ── Desbloqueia o áudio no primeiro gesto (regra dos navegadores) ──
+function unlockAudioOnce() {
+  audio.unlock();
+  window.removeEventListener('pointerdown', unlockAudioOnce);
+  window.removeEventListener('keydown', unlockAudioOnce);
+}
+window.addEventListener('pointerdown', unlockAudioOnce, { once: false });
+window.addEventListener('keydown', unlockAudioOnce, { once: false });
 
 window.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;

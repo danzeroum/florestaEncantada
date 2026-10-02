@@ -94,6 +94,14 @@ export function createMenuUI(root, options = {}) {
     disabled: !muteEnabled,
   });
 
+  let muted = options.muted === true;
+
+  function setMuted(value) {
+    muted = value === true;
+    muteBtn.innerHTML = muted ? SOUND_OFF_ICON_SVG : SOUND_ON_ICON_SVG;
+    muteBtn.setAttribute('aria-label', muted ? 'Ligar som' : 'Desligar som');
+  }
+
   inner.appendChild(playBtn);
   inner.appendChild(howToBtn);
   inner.appendChild(muteBtn);
@@ -118,5 +126,5 @@ export function createMenuUI(root, options = {}) {
     return !overlay.hidden;
   }
 
-  return { show, hide, dispose, isVisible };
+  return { show, hide, dispose, isVisible, setMuted };
 }

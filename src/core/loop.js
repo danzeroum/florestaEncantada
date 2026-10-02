@@ -10,6 +10,7 @@ import {
 } from './physics.js';
 import { collectNut } from './Nut.js';
 import { createScoreManager } from './ScoreManager.js';
+import { SFX } from './AudioManager.js';
 
 const MOVE_SPEED = 5;
 const CAMERA_LERP = 0.08;
@@ -41,6 +42,7 @@ export function startLoop(sceneData) {
     hud,
     lifeManager,
     onPhaseComplete,
+    audio,
   } = sceneData;
   const cameraOffset = new THREE.Vector3(0, 14, 22);
   const cameraTarget = new THREE.Vector3();
@@ -79,6 +81,7 @@ export function startLoop(sceneData) {
   function onObstacleHit() {
     if (invulnerability > 0) return;
 
+    if (audio) audio.play(SFX.LOSE_LIFE);
     lifeManager.loseLife();
     invulnerability = INVULNERABILITY_TIME;
 
@@ -114,6 +117,7 @@ export function startLoop(sceneData) {
       player.velocity.y = JUMP_VELOCITY;
       player.onGround = false;
       jumpCooldown = JUMP_COOLDOWN;
+      if (audio) audio.play(SFX.JUMP);
     }
 
     // ── 3. Gravidade ──
@@ -141,6 +145,7 @@ export function startLoop(sceneData) {
       if (checkCollision(player, nut)) {
         if (collectNut(scene, nut)) {
           const score = scoreManager.increment();
+          if (audio) audio.play(SFX.COLLECT);
           if (hud) hud.setScore(score, scoreManager.getTotal());
           particles.explode(
             nut.position.x,
@@ -173,6 +178,7 @@ export function startLoop(sceneData) {
     if (!victoryShown && scoreManager.isVictory()) {
       victoryShown = true;
       running = false;
+      if (audio) audio.play(SFX.VICTORY);
       if (typeof onPhaseComplete === 'function') onPhaseComplete();
     }
 
