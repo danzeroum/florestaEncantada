@@ -4,6 +4,8 @@ import { setupInput } from './core/input.js';
 import { startLoop } from './core/loop.js';
 import { createHUD } from './ui/HUD.js';
 import { createMenuUI } from './ui/MenuUI.js';
+import { createHowToPlayUI } from './ui/HowToPlayUI.js';
+import { createPauseUI } from './ui/PauseUI.js';
 import { createNut } from './core/Nut.js';
 import {
   createLogObstacle,
@@ -33,6 +35,8 @@ let currentLoop = null;
 let hud = null;
 let lifeManager = null;
 let menu = null;
+let howTo = null;
+let pause = null;
 
 function createObstacle(type, x, z) {
   switch (type) {
@@ -159,25 +163,92 @@ function startNewGame() {
 
 function showMenu() {
   stopLoop();
-  if (hud) hud.hideVictory();
-  if (hud) hud.hideGameOver();
+  if (hud) {
+    hud.hideVictory();
+    hud.hideGameOver();
+  }
   gameState.set(STATES.MENU);
   menu.show();
 }
 
-function hideMenu() {
-  menu.hide();
+function showPause() {
+  if (!gameState.is(STATES.RUNNING)) return;
+  gameState.set(STATES.PAUSED);
+  stopLoop();
+  pause.show();
 }
+
+function hidePauseAndResume() {
+  pause.hide();
+  if (gameState.is(STATES.PAUSED)) {
+    gameState.set(STATES.RUNNING);
+    currentLoop = startLoop({
+      scene,
+      camera,
+      renderer,
+      player,
+      obstacles,
+      nuts,
+      particles,
+      hud,
+      lifeManager,
+      onPhaseComplete,
+    });
+  }
+}
+
+function quitToMenu() {
+  pause.hide();
+  showMenu();
+}
+
+// ── Instancia UIs ──
 
 menu = createMenuUI(root, {
   onPlay: () => {
-    hideMenu();
+    menu.hide();
     startNewGame();
   },
   onHowToPlay: () => {
-    // Fase 4.2 vai implementar. Por enquanto, não faz nada.
+    menu.hide();
+    gameState.set(STATES.HOW_TO_PLAY);
+    howTo.show();
   },
   muteEnabled: false,
+});
+
+howTo = createHowToPlayUI(root, {
+  onBack: () => {
+    howTo.hide();
+    showMenu();
+  },
+});
+
+pause = createPauseUI(root, {
+  onResume: hidePauseAndResume,
+  onRestart: () => {
+    pause.hide();
+    loadPhase();
+  },
+  onQuit: quitToMenu,
+});
+
+// ── ESC pausa/despausa ──
+
+window.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+
+  if (gameState.is(STATES.RUNNING)) {
+    event.preventDefault();
+    showPause();
+  } else if (gameState.is(STATES.PAUSED)) {
+    event.preventDefault();
+    hidePauseAndResume();
+  } else if (gameState.is(STATES.HOW_TO_PLAY)) {
+    event.preventDefault();
+    howTo.hide();
+    showMenu();
+  }
 });
 
 showMenu();
