@@ -3,6 +3,7 @@
   --text: #212121;
   --text-light: #fafafa;
   --accent: #ffb300;
+  --hud-bg: rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -28,9 +29,6 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
 }
 
@@ -40,23 +38,146 @@ body {
   height: 100%;
 }
 
-#cube-label {
+/* ── HUD ─────────────────────────────────────────── */
+
+.hud {
   position: absolute;
-  top: 24px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--hud-bg);
+  border-radius: 999px;
   color: var(--text-light);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  user-select: none;
+  font-weight: 800;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
   pointer-events: none;
+  user-select: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 10;
 }
 
+.hud__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hud__counter {
+  line-height: 1;
+  transition: transform 0.12s ease-out;
+}
+
+.hud__counter--bump {
+  animation: hud-bump 0.28s ease-out;
+}
+
+@keyframes hud-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── Tela de vitória ─────────────────────────────── */
+
+.victory {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 20;
+  animation: victory-fade 0.3s ease-out;
+}
+
+.victory[hidden] {
+  display: none;
+}
+
+.victory__icon svg {
+  width: 120px;
+  height: 120px;
+  animation: victory-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.victory__replay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border: none;
+  border-radius: 50%;
+  background: #ffb300;
+  color: #212121;
+  cursor: pointer;
+  transition: transform 0.15s ease-out, background 0.15s ease-out;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.victory__replay:hover,
+.victory__replay:focus-visible {
+  transform: scale(1.1);
+  background: #ffc107;
+  outline: 4px solid #fff;
+  outline-offset: 2px;
+}
+
+.victory__replay:active {
+  transform: scale(0.95);
+}
+
+@keyframes victory-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes victory-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Responsividade ──────────────────────────────── */
+
 @media (max-width: 480px) {
-  #cube-label {
-    font-size: 1.1rem;
-    top: 16px;
+  .hud {
+    font-size: 1.4rem;
+    padding: 6px 12px;
+    top: 12px;
+    right: 12px;
+  }
+  .hud__icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .victory__icon svg {
+    width: 80px;
+    height: 80px;
+  }
+  .victory__replay {
+    width: 72px;
+    height: 72px;
   }
 }
