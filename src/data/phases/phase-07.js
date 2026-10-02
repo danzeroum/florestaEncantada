@@ -33,6 +33,7 @@ export default {
       { type: 'cube', x: 31.5, z: 0 },
       { type: 'sphere', x: 35, z: 0 },
     ],
+    powerUps: [{ type: 'slowMo', x: 22, z: 0 }],
   },
   winCondition: { type: 'collect_all' },
 };

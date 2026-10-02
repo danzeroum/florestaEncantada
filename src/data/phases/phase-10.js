@@ -39,6 +39,10 @@ export default {
       { type: 'cone', x: 43, z: 0 },
       { type: 'cube', x: 45, z: 0 },
     ],
+    powerUps: [
+      { type: 'magnet', x: 15, z: 0 },
+      { type: 'double', x: 35, z: 0 },
+    ],
   },
   winCondition: { type: 'collect_all' },
 };

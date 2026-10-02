@@ -30,7 +30,7 @@ export function startApp(root) {
 
   // Cria a cena com o tema da primeira fase
   const firstTheme = PHASES[0]?.theme ?? {};
-  const { scene, camera, renderer, player, obstacles, nuts, particles, applyTheme } =
+  const { scene, camera, renderer, player, obstacles, nuts, powerUps, particles, applyTheme } =
     createScene(firstTheme);
   root.appendChild(renderer.domElement);
   errorBoundary.attachCanvas(renderer.domElement);
@@ -104,6 +104,7 @@ export function startApp(root) {
     player,
     obstacles,
     nuts,
+    powerUps,
     particles,
     gameState,
     levelManager,

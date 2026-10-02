@@ -4,6 +4,7 @@
  */
 
 import { createNut } from '../core/Nut.js';
+import { createPowerUp } from '../core/PowerUp.js';
 import {
   createLogObstacle,
   createMoleHoleObstacle,
@@ -74,7 +75,7 @@ export function resetPlayer(player) {
  * @param {{ obstacles:Array, nuts:Array }} layout
  */
 export function rebuildWorld(refs, layout) {
-  const { scene, obstacles, nuts } = refs;
+  const { scene, obstacles, nuts, powerUps = [] } = refs;
   const speed = layout.speed ?? 1;
 
   for (const nut of nuts) disposeMesh(nut.mesh);
@@ -87,5 +88,11 @@ export function rebuildWorld(refs, layout) {
   obstacles.length = 0;
   for (const item of layout.obstacles) {
     obstacles.push(createObstacle(item.type, scene, item.x, item.z, { speed }));
+  }
+
+  for (const pu of powerUps) disposeMesh(pu.mesh);
+  powerUps.length = 0;
+  for (const item of layout.powerUps ?? []) {
+    powerUps.push(createPowerUp(scene, item.type, item.x, item.z));
   }
 }

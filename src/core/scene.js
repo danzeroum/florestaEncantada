@@ -84,6 +84,7 @@ export function createScene(theme = {}) {
   // Arrays mutáveis — WorldBuilder preenche e limpa
   const obstacles = [];
   const nuts = [];
+  const powerUps = [];
 
   return {
     scene,
@@ -92,6 +93,7 @@ export function createScene(theme = {}) {
     player,
     obstacles,
     nuts,
+    powerUps,
     particles,
     applyTheme,
   };

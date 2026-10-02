@@ -34,6 +34,10 @@ export default {
       { type: 'sphere', x: 39, z: 0 },
       { type: 'cone', x: 41, z: 0 },
     ],
+    powerUps: [
+      { type: 'double', x: 20, z: 0 },
+      { type: 'shield', x: 35, z: 0 },
+    ],
   },
   winCondition: { type: 'collect_all' },
 };

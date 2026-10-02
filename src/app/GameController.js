@@ -9,6 +9,7 @@
 
 import { startLoop } from '../core/loop.js';
 import { createLifeManager } from '../core/LifeManager.js';
+import { createEffectManager } from '../core/EffectManager.js';
 import { createHUD } from '../ui/HUD.js';
 import { resetPlayer, rebuildWorld } from './WorldBuilder.js';
 import { focusGameCanvas } from '../utils/focus.js';
@@ -34,6 +35,7 @@ export function createGameController(deps) {
     player,
     obstacles,
     nuts,
+    powerUps,
     particles,
     gameState,
     levelManager,
@@ -49,6 +51,7 @@ export function createGameController(deps) {
   let currentLoop = null;
   let hud = null;
   let lifeManager = null;
+  const effects = createEffectManager();
 
   function stopLoop() {
     if (currentLoop) {
@@ -59,6 +62,7 @@ export function createGameController(deps) {
 
   function onGameOver() {
     stopLoop();
+    effects.clear();
     gameState.set(STATES.GAME_OVER);
     if (hud) hud.showGameOver();
   }
@@ -76,6 +80,8 @@ export function createGameController(deps) {
       lifeManager,
       onPhaseComplete,
       audio,
+      effects,
+      powerUps,
     });
   }
 

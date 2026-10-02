@@ -38,6 +38,7 @@ export default {
       { type: 'sphere', x: 31, z: 0 },
       { type: 'cone', x: 36, z: 0 },
     ],
+    powerUps: [{ type: 'magnet', x: 20, z: 0 }],
   },
   winCondition: { type: 'collect_all' },
 };
