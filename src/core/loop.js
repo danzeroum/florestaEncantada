@@ -6,12 +6,15 @@ import {
   resolveCollision,
   JUMP_VELOCITY,
   JUMP_COOLDOWN,
+  GROUND_Y,
 } from './physics.js';
 import { collectNut } from './Nut.js';
 import { createScoreManager } from './ScoreManager.js';
 
 const MOVE_SPEED = 5;
 const CAMERA_LERP = 0.08;
+const INVULNERABILITY_TIME = 1.0; // segundos de invulnerabilidade após perder vida
+const TRIP_DURATION = 0.4;
 
 const NUT_COLORS = {
   sphere: 0xff5252,
@@ -20,14 +23,14 @@ const NUT_COLORS = {
 };
 
 /**
- * Loop principal da Fase 2.
- * Retorna um handle com `stop()` para cancelar o loop (usado no replay).
+ * Loop principal da Fase 3.1 (com vidas).
+ * Retorna handle com `stop()` para cancelar o loop.
  *
- * @param {{ scene:THREE.Scene, camera:THREE.PerspectiveCamera, renderer:THREE.WebGLRenderer, player:any, obstacles:any[], nuts:any[], particles:any, hud?:any }} sceneData
+ * @param {{ scene:THREE.Scene, camera:THREE.PerspectiveCamera, renderer:THREE.WebGLRenderer, player:any, obstacles:any[], nuts:any[], particles:any, hud?:any, lifeManager?:any }} sceneData
  * @returns {{ stop:()=>void, scoreManager:any }}
  */
 export function startLoop(sceneData) {
-  const { scene, camera, renderer, player, obstacles, nuts, particles, hud } = sceneData;
+  const { scene, camera, renderer, player, obstacles, nuts, particles, hud, lifeManager } = sceneData;
   const cameraOffset = new THREE.Vector3(0, 14, 22);
   const cameraTarget = new THREE.Vector3();
   const lerpTarget = new THREE.Vector3();
@@ -39,13 +42,54 @@ export function startLoop(sceneData) {
   let rafId = 0;
   let lastTimestamp = performance.now();
 
-  if (hud) hud.setScore(0, nuts.length);
+  let invulnerability = 0;
+  let tripTimer = 0;
+
+  if (hud) {
+    hud.setScore(0, nuts.length);
+    if (lifeManager) hud.setLives(lifeManager.getLives(), lifeManager.getLives());
+  }
+
+  function resetPlayerPosition() {
+    player.position.x = 0;
+    player.position.y = GROUND_Y;
+    player.position.z = 0;
+    player.velocity.x = 0;
+    player.velocity.y = 0;
+    player.velocity.z = 0;
+    player.onGround = true;
+  }
+
+  function tripAnimation() {
+    player.mesh.scale.set(1.2, 0.7, 1.2);
+    tripTimer = TRIP_DURATION;
+  }
+
+  function onObstacleHit() {
+    if (invulnerability > 0) return;
+
+    lifeManager.loseLife();
+    invulnerability = INVULNERABILITY_TIME;
+
+    if (hud && lifeManager) {
+      hud.setLives(lifeManager.getLives(), 3);
+    }
+
+    resetPlayerPosition();
+    tripAnimation();
+  }
 
   function animate(timestamp) {
     if (!running) return;
 
     const delta = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
     lastTimestamp = timestamp;
+
+    if (invulnerability > 0) invulnerability -= delta;
+    if (tripTimer > 0) {
+      tripTimer -= delta;
+      if (tripTimer <= 0) player.mesh.scale.set(1, 1, 1);
+    }
 
     const input = getInputState();
 
@@ -64,12 +108,17 @@ export function startLoop(sceneData) {
     // ── 3. Gravidade ──
     applyGravity(player, delta);
 
-    // ── 4. Colisão com obstáculos ──
+    // ── 4. Colisão com obstáculos (perde vida) ──
     for (const obstacle of obstacles) {
       if (checkCollision(player, obstacle)) {
+        // Empurra para fora para não ficar preso
         const push = resolveCollision(player, obstacle);
         player.position.x += push.x;
         player.position.z += push.z;
+
+        // Só tira vida se o obstáculo está ativo (moleHole pode estar oculto)
+        const active = typeof obstacle.isActive === 'function' ? obstacle.isActive() : true;
+        if (active) onObstacleHit();
       }
     }
 
@@ -93,19 +142,25 @@ export function startLoop(sceneData) {
     // ── 6. Partículas ──
     particles.update(delta);
 
-    // ── 7. Mesh do player ──
+    // ── 7. Obstáculos animados ──
+    for (const obstacle of obstacles) {
+      if (typeof obstacle.update === 'function') obstacle.update(delta);
+    }
+
+    // ── 8. Mesh do player ──
     player.mesh.position.set(player.position.x, player.position.y, player.position.z);
 
-    // ── 8. Câmera ──
+    // ── 9. Câmera ──
     cameraTarget.set(player.position.x, player.position.y + 1, player.position.z);
     lerpTarget.copy(cameraTarget).add(cameraOffset);
     camera.position.lerp(lerpTarget, CAMERA_LERP);
     camera.lookAt(cameraTarget);
 
-    // ── 9. Vitória ──
+    // ── 10. Vitória ──
     if (!victoryShown && scoreManager.isVictory()) {
       victoryShown = true;
       if (hud) hud.showVictory();
+      running = false;
     }
 
     renderer.render(scene, camera);
